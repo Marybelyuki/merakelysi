@@ -35,11 +35,10 @@ function App() {
           padding: '2rem',
           borderRadius: '1.5rem',
           textAlign: 'center',
-          boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-          cursor: 'pointer'
+          boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
         }}>
           <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📚</div>
-          Mis Libros por Leer
+          <h3>Mis Libros por Leer</h3>
         </div>
         
         <div style={{
@@ -48,11 +47,10 @@ function App() {
           padding: '2rem',
           borderRadius: '1.5rem',
           textAlign: 'center',
-          boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-          cursor: 'pointer'
+          boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
         }}>
           <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📅</div>
-          Calendario de Lecturas
+          <h3>Calendario de Lecturas</h3>
         </div>
         
         <div style={{
@@ -61,11 +59,10 @@ function App() {
           padding: '2rem',
           borderRadius: '1.5rem',
           textAlign: 'center',
-          boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-          cursor: 'pointer'
+          boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
         }}>
           <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📈</div>
-          Mi Progreso
+          <h3>Mi Progreso</h3>
         </div>
         
         <div style={{
@@ -74,20 +71,14 @@ function App() {
           padding: '2rem',
           borderRadius: '1.5rem',
           textAlign: 'center',
-          boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-          cursor: 'pointer'
+          boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
         }}>
           <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📚</div>
-          Mis Clubes de Lectura
+          <h3>Mis Clubes de Lectura</h3>
         </div>
-      </div>
-      
-      <div style={{ textAlign: 'center', marginTop: '3rem', color: '#9ca3af' }}>
-        <p>✨ Próximamente más funcionalidades ✨</p>
       </div>
     </div>
   );
 }
 
 export default App;
-   
