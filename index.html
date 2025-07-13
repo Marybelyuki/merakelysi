@@ -1,12 +1,850 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Merakelysi - Mi Universo Literario</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merakelysi - Mi Universo Literario</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- General & Base Styles --- */
+        :root {
+            --pink: #f472b6;
+            --purple: #a855f7;
+            --blue: #60a5fa;
+            --green: #10b981;
+            --yellow: #f59e0b;
+            --red: #ef4444;
+            --text-primary: #374151;
+            --text-secondary: #6b7280;
+            --bg-light: rgba(255, 255, 255, 0.8);
+            --border-light: rgba(229, 231, 235, 0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #fdf2f8, #f5f3ff, #ecfdf5);
+            min-height: 100vh;
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><text y='20' font-size='20'>🦄</text></svg>"), auto;
+            position: relative;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        /* --- Decorative Background Elements --- */
+        .bg-decoration {
+            position: fixed;
+            opacity: 0.07;
+            pointer-events: none;
+            z-index: 0;
+            animation: float 6s ease-in-out infinite;
+        }
+        .bg-book-1 { top: 10%; left: 5%; font-size: 5rem; animation-duration: 8s; }
+        .bg-book-2 { top: 70%; left: 8%; font-size: 3rem; animation-duration: 10s; }
+        .bg-butterfly { bottom: 20%; right: 10%; font-size: 6rem; animation: float-butterfly 12s ease-in-out infinite; transition: color 0.5s ease; }
+        .bg-star { top: 25%; right: 15%; font-size: 3rem; animation-duration: 12s; }
+        .bg-flower { top: 60%; right: 5%; font-size: 4rem; animation-duration: 9s; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- Header Styles --- */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+            padding: 2.5rem 2rem;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 24px;
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 10vw, 5rem); /* Responsive font size */
+            font-weight: 700;
+            background: linear-gradient(to right, var(--pink), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            position: relative;
+            text-shadow: 0 2px 15px rgba(168, 85, 247, 0.1);
+        }
+        .title::before, .title::after {
+            position: absolute;
+            opacity: 0.8;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+        .title::before { content: '🌸'; top: -0.5em; right: -0.5em; font-size: 0.5em; animation: pulse 2.5s infinite; }
+        .title::after { content: '🦋'; bottom: -0.2em; left: -0.5em; font-size: 0.4em; animation: float 3.5s ease-in-out infinite; }
+
+        .author-attribution { font-size: 1rem; color: var(--purple); font-weight: 600; margin-bottom: 1.5rem; }
+
+        .user-name-input { margin-bottom: 1rem; }
+        .user-name-input label { font-size: 1.2rem; color: var(--text-secondary); font-weight: 600; }
+        .user-name-input input {
+            border: none;
+            border-bottom: 2px dashed var(--pink);
+            background: none;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            text-align: center;
+            width: 220px;
+            padding: 0.2rem 0.5rem;
+            transition: border-color 0.3s ease;
+        }
+        .user-name-input input:focus { outline: none; border-bottom-color: var(--purple); }
+        
+        .status { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .status-dot { width: 8px; height: 8px; background-color: var(--green); border-radius: 50%; animation: pulse-status 2s infinite; }
+        .status-text { font-size: 0.8rem; color: #9ca3af; font-weight: 500; }
+        
+        /* --- General UI Components (Buttons, Cards) --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--bg-light);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.15);
+        }
+        .card-icon { font-size: 2.5rem; margin-bottom: 1rem; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05)); }
+        .card-title { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+
+        .btn {
+            background: linear-gradient(135deg, var(--pink), #e879f9);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.6rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 12px rgba(244, 114, 182, 0.2);
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(244, 114, 182, 0.3); }
+        .btn:active { transform: translateY(0); }
+
+        .back-btn { background: linear-gradient(135deg, #cbd5e1, #94a3b8); }
+        .back-btn:hover { box-shadow: 0 8px 16px rgba(148, 163, 184, 0.3); }
+
+        /* --- Section Styles --- */
+        .nav-section { display: none; }
+        .nav-section.active { display: block; animation: fadeIn 0.5s ease; }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .section-title { font-size: 2rem; font-weight: 700; color: var(--text-primary); }
+        
+        .items-grid {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        }
+
+        .item-card {
+            background: var(--bg-light);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-light);
+            position: relative;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            word-wrap: break-word;
+        }
+        .item-card:hover { transform: translateY(-4px); box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.12); }
+        .item-title { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; }
+        .item-subtitle { color: var(--text-secondary); font-weight: 500; margin-bottom: 0.75rem; }
+        .item-meta { color: var(--purple); font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .item-notes { font-size: 0.9rem; color: var(--text-secondary); white-space: pre-wrap; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border-light); }
+        
+        .item-actions { margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end; }
+        .item-actions button {
+            background: #a78bfa; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px;
+            font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+        }
+        .item-actions button:hover { transform: translateY(-1px); }
+        .item-actions button.action-edit { background-color: var(--blue); }
+        .item-actions button.action-finish { background-color: var(--green); }
+        .item-actions button.action-review { background-color: var(--yellow); }
+        
+        .delete-btn {
+            position: absolute; top: 0.75rem; right: 0.75rem; background: #fca5a5; color: white; border: none;
+            width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; font-weight: bold;
+            display: flex; justify-content: center; align-items: center; line-height: 1; transition: all 0.2s ease;
+        }
+        .delete-btn:hover { background: var(--red); transform: scale(1.1) rotate(90deg); }
+
+        /* --- Empty State --- */
+        .empty-state {
+            text-align: center; padding: 4rem 2rem; color: var(--text-secondary); background: var(--bg-light);
+            border-radius: 24px; border: 1px dashed var(--border-light); backdrop-filter: blur(10px);
+        }
+        .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+        
+        /* --- Modal Styles --- */
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(245, 243, 255, 0.5);
+            backdrop-filter: blur(8px); z-index: 1000; display: flex; justify-content: center; align-items: center;
+            opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-backdrop.active { opacity: 1; visibility: visible; }
+
+        .modal-content {
+            background: linear-gradient(135deg, #ffffff, #f5f3ff); padding: 2.5rem; border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); position: relative; max-width: 550px;
+            width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid white;
+            transform: scale(0.95); transition: transform 0.3s ease;
+        }
+        .modal-backdrop.active .modal-content { transform: scale(1); }
+        .modal-content h3 { font-size: 1.75rem; font-family: 'Playfair Display', serif; color: var(--text-primary); margin-bottom: 1.5rem; text-align: center; }
+        .modal-content h4 { font-size: 1.1rem; color: var(--purple); margin-top: 1.5rem; margin-bottom: 1rem; border-bottom: 1px dashed #d1d5db; padding-bottom: 0.5rem; }
+
+        .modal-close-btn {
+            position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.75rem;
+            cursor: pointer; color: #9ca3af; transition: color 0.2s ease, transform 0.2s ease;
+        }
+        .modal-close-btn:hover { color: var(--red); transform: rotate(90deg); }
+
+        .modal-form label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-secondary); }
+        .modal-form input, .modal-form textarea, .modal-form select {
+            width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #d1d5db; border-radius: 8px;
+            font-size: 1rem; color: var(--text-primary); background-color: #f9fafb;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .modal-form input:focus, .modal-form textarea:focus, .modal-form select:focus {
+            outline: none; border-color: var(--pink); box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.2);
+        }
+        .modal-form textarea { min-height: 100px; resize: vertical; }
+        .modal-form button[type="submit"] { width: 100%; margin-top: 1rem; background: linear-gradient(135deg, var(--purple), #f472b6); }
+        
+        /* --- Specific Section: Book Reviews --- */
+        .book-review-card {
+            background: var(--bg-light); border-radius: 24px; padding: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05); border: 1px solid var(--border-light);
+        }
+        .book-review-card h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--text-primary); }
+        .book-review-card .review-section { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed #d1d5db; }
+        .book-review-card .review-section h4 { font-size: 1rem; color: var(--purple); margin-bottom: 0.5rem; font-weight: 600; }
+        .book-review-card .review-section p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; }
+        .book-review-card .rating-hearts { color: var(--pink); font-size: 1.5rem; }
+
+        /* --- Animations --- */
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
+        @keyframes float-butterfly { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(10deg); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.07; transform: scale(1); } 50% { opacity: 0.12; transform: scale(1.08); } }
+        @keyframes pulse-status { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.4); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- Responsive Styles --- */
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .section-header { flex-direction: column; align-items: stretch; text-align: center; }
+            .items-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
+
+    <div class="bg-decoration bg-book-1">📚</div>
+    <div class="bg-decoration bg-book-2">📖</div>
+    <div class="bg-decoration bg-butterfly">🦋</div>
+    <div class="bg-decoration bg-star">✨</div>
+    <div class="bg-decoration bg-flower">🌸</div>
+
+    <div class="container">
+        <section id="home" class="nav-section">
+            <header class="header">
+                <h1 class="title">Merakelysi</h1>
+                <p class="author-attribution">By Maribel Alba</p>
+                <div class="user-name-input">
+                    <label for="userName">Hola, </label>
+                    <input type="text" id="userName" placeholder="tu nombre aquí">
+                </div>
+                <div class="status">
+                    <div class="status-dot"></div>
+                    <span class="status-text">Datos guardados en tu navegador</span>
+                </div>
+            </header>
+
+            <main id="homeGrid" class="grid">
+                </main>
+        </section>
+
+        <section id="books" class="nav-section"></section>
+        <section id="clubs" class="nav-section"></section>
+        <section id="calendar" class="nav-section"></section>
+        <section id="quotes" class="nav-section"></section>
+        <section id="wishlist" class="nav-section"></section>
+        <section id="bookReviews" class="nav-section"></section>
+        <section id="generalReviews" class="nav-section"></section>
+        <section id="playlists" class="nav-section"></section>
+        <section id="diary" class="nav-section"></section>
+        <section id="progress" class="nav-section"></section>
+        <section id="challenges" class="nav-section"></section>
+        <section id="tributes" class="nav-section"></section>
+        <section id="stats" class="nav-section"></section>
+        <section id="monthly" class="nav-section"></section>
+        <section id="finished" class="nav-section"></section>
+        <section id="favorites" class="nav-section"></section>
+        <section id="suggestions" class="nav-section"></section>
+    </div>
+
+    <div id="modal-container"></div>
+    
+    <div id="notification-container"></div>
+    <div id="celebration-container"></div>
+
+
+<script>
+// ===================================================================================
+// MERAKELYSI APP 2.0 - REFACTORIZADO Y MEJORADO
+// Arquitecto de Código: Tu Asistente IA de Confianza
+// Fecha: 12 de julio de 2025
+// ===================================================================================
+
+/**
+ * @file app.js
+ * @description Lógica principal de la aplicación Merakelysi.
+ * @summary Este script ha sido completamente reestructurado para mejorar la modularidad,
+ * la mantenibilidad y la experiencia de usuario.
+ */
+
+// -----------------------------------------------------------------------------------
+// 1. CONFIGURACIÓN Y ESTADO GLOBAL
+// -----------------------------------------------------------------------------------
+
+const config = {
+    storageKey: 'merakelysi_data_v2',
+    userNameKey: 'merakelysi_userName_v2',
+    pastelColors: ['#FFB6C1', '#87CEEB', '#98FB98', '#DDA0DD', '#F0E68C', '#FFA07A', '#a855f7', '#3b82f6', '#f472b6', '#fde68a', '#ccfbf1', '#bfdbfe'],
+    sections: [
+        { id: 'books', title: 'Mis Libros por Leer', icon: '📚' },
+        { id: 'clubs', title: 'Mis Clubes de Lectura', icon: '👥' },
+        { id: 'calendar', title: 'Calendario de Lecturas', icon: '📅' },
+        { id: 'quotes', title: 'Frases de Lecturas', icon: '📝' },
+        { id: 'wishlist', title: 'Wishlist de Libros', icon: '💖' },
+        { id: 'bookReviews', title: 'Reseñas Detalladas', icon: '🖋️' },
+        { id: 'generalReviews', title: 'Reseñas Generales', icon: '✍️' },
+        { id: 'playlists', title: 'Playlist de Spotify', icon: '🎧' },
+        { id: 'diary', title: 'Diario de Lectura', icon: '📓' },
+        { id: 'progress', title: 'Mi Progreso', icon: '📈' },
+        { id: 'challenges', title: 'Retos Lectores', icon: '🧩' },
+        { id: 'tributes', title: 'Homenajes Literarios', icon: '✨' },
+        { id: 'stats', title: 'Estadísticas', icon: '📊' },
+        { id: 'monthly', title: 'Retos del Mes', icon: '🎯' },
+        { id: 'finished', title: 'Lecturas Terminadas', icon: '✅' },
+        { id: 'favorites', title: 'Favoritos del Año', icon: '🌟' },
+        { id: 'suggestions', title: 'Sugerencias Automáticas', icon: '🤖' },
+    ]
+};
+
+const state = {
+    currentSection: 'home',
+    userName: '',
+    db: {}
+};
+
+// -----------------------------------------------------------------------------------
+// 2. MÓDULO DE ALMACENAMIENTO (STORAGE)
+// -----------------------------------------------------------------------------------
+
+const storage = {
+    save() {
+        try {
+            localStorage.setItem(config.storageKey, JSON.stringify(state.db));
+            console.log('✅ Datos guardados en localStorage');
+        } catch (error) {
+            console.error('❌ Error al guardar datos:', error);
+            ui.showNotification('Error al guardar los datos.', 'error');
+        }
+    },
+    load() {
+        const emptyDB = {
+            books: [], clubs: [], events: [], quotes: [], wishlist: [],
+            generalReviews: [], playlists: [], diary: [], goals: [],
+            challenges: [], tributes: [], favorites: [], suggestions: []
+        };
+        
+        try {
+            const savedData = localStorage.getItem(config.storageKey);
+            if (!savedData) {
+                console.log('🆕 No hay datos guardados, iniciando con base de datos vacía.');
+                state.db = emptyDB;
+                return;
+            }
+            
+            const parsedData = JSON.parse(savedData);
+            
+            // Migración inteligente: asegura que todos los campos existan
+            for (const key in emptyDB) {
+                state.db[key] = parsedData[key] || emptyDB[key];
+            }
+            
+            // Asegurar que los objetos internos tengan todos los campos (para futuras actualizaciones)
+            if (state.db.books) {
+                 state.db.books = state.db.books.map(book => ({
+                    isFinished: false,
+                    notes: '',
+                    clubId: null,
+                    review: null,
+                    ...book // Los datos guardados sobreescriben los por defecto
+                }));
+            }
+            
+            console.log('📂 Datos cargados y validados desde localStorage.');
+
+        } catch (error) {
+            console.error('❌ Error al cargar o analizar los datos:', error);
+            state.db = emptyDB;
+            alert('Hubo un error al cargar tus datos. Se ha iniciado una sesión nueva para proteger tu información.');
+        }
+    },
+    loadUserName() {
+        state.userName = localStorage.getItem(config.userNameKey) || '';
+        document.getElementById('userName').value = state.userName;
+    },
+    saveUserName() {
+        state.userName = document.getElementById('userName').value.trim();
+        localStorage.setItem(config.userNameKey, state.userName);
+        console.log(`👤 Nombre de usuario guardado: ${state.userName}`);
+    }
+};
+
+// -----------------------------------------------------------------------------------
+// 3. MÓDULO DE INTERFAZ DE USUARIO (UI)
+// -----------------------------------------------------------------------------------
+
+const ui = {
+    renderSection(sectionId) {
+        // Oculta todas las secciones
+        document.querySelectorAll('.nav-section').forEach(section => {
+            section.classList.remove('active');
+        });
+
+        // Muestra la sección activa
+        const targetSection = document.getElementById(sectionId);
+        if (targetSection) {
+            targetSection.classList.add('active');
+            state.currentSection = sectionId;
+            this.renderContentForCurrentSection();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            console.error(`❌ Sección con ID "${sectionId}" no encontrada. Volviendo a inicio.`);
+            this.renderSection('home');
+        }
+    },
+
+    renderContentForCurrentSection() {
+        const sectionConfig = config.sections.find(s => s.id === state.currentSection);
+        if (!sectionConfig) return;
+
+        const sectionElement = document.getElementById(sectionConfig.id);
+        if (!sectionElement) return;
+
+        sectionElement.innerHTML = this.createSectionHeader(sectionConfig.title, sectionConfig.id);
+        const container = document.createElement('div');
+        container.id = `${sectionConfig.id}Container`;
+        container.className = 'items-grid'; // Clase por defecto
+        sectionElement.appendChild(container);
+        
+        // Llamada a la función de renderizado específica
+        if(typeof rendering[sectionConfig.id] === 'function') {
+            rendering[sectionConfig.id](container);
+        } else {
+            rendering.default(container, sectionConfig.icon, sectionConfig.title);
+        }
+    },
+
+    createSectionHeader(title, sectionId) {
+        const addButtonConfig = {
+            'books': { label: 'Agregar Libro', modal: 'addBookModal' },
+            'clubs': { label: 'Crear Club', modal: 'addClubModal' },
+            'calendar': { label: 'Nuevo Evento', modal: 'addEventModal' },
+            'quotes': { label: 'Nueva Frase', modal: 'addQuoteModal' },
+            'wishlist': { label: 'Agregar Deseo', modal: 'addWishModal' },
+            'generalReviews': { label: 'Nueva Reseña', modal: 'addGeneralReviewModal'},
+            'playlists': { label: 'Nueva Playlist', modal: 'addPlaylistModal' },
+            'diary': { label: 'Nueva Entrada', modal: 'addDiaryModal' },
+            'progress': { label: 'Nuevo Reto', modal: 'addGoalModal' },
+            'challenges': { label: 'Nuevo Reto', modal: 'addChallengeModal' },
+            'tributes': { label: 'Nuevo Homenaje', modal: 'addTributeModal'},
+            'favorites': { label: 'Agregar Favorito', modal: 'addFavoriteModal' },
+            'suggestions': { label: '🔄 Generar Sugerencias', action: 'generateSuggestions()' }
+        };
+
+        let buttonHtml = '';
+        if(addButtonConfig[sectionId]){
+            if(addButtonConfig[sectionId].modal) {
+                buttonHtml = `<button class="btn" onclick="modals.open('${addButtonConfig[sectionId].modal}')">+ ${addButtonConfig[sectionId].label}</button>`;
+            } else if (addButtonConfig[sectionId].action) {
+                buttonHtml = `<button class="btn" onclick="app.${addButtonConfig[sectionId].action}"> ${addButtonConfig[sectionId].label}</button>`;
+            }
+        }
+
+        return `
+            <div class="section-header">
+                <button class="btn back-btn" onclick="ui.renderSection('home')">← Inicio</button>
+                <h2 class="section-title">${title}</h2>
+                ${buttonHtml}
+            </div>
+        `;
+    },
+
+    createHomeMenu() {
+        const grid = document.getElementById('homeGrid');
+        grid.innerHTML = config.sections.map(section => `
+            <div class="card" onclick="ui.renderSection('${section.id}')">
+                <div class="card-icon">${section.icon}</div>
+                <h3 class="card-title">${section.title}</h3>
+            </div>
+        `).join('');
+    },
+    
+    showNotification(message, type = 'success') {
+        const container = document.getElementById('notification-container');
+        const notif = document.createElement('div');
+        notif.className = `notification ${type}`;
+        notif.textContent = message;
+        
+        container.appendChild(notif);
+        
+        setTimeout(() => {
+            notif.classList.add('out');
+            notif.addEventListener('transitionend', () => notif.remove());
+        }, 3000);
+    },
+    
+    showCelebration(message) {
+        const container = document.getElementById('celebration-container');
+        container.innerHTML = ''; // Limpiar celebraciones anteriores
+
+        // Mensaje central
+        const goalMessage = document.createElement('div');
+        goalMessage.className = 'goal-message';
+        goalMessage.innerHTML = `<span>🎉</span><p>${message}</p>`;
+        container.appendChild(goalMessage);
+        setTimeout(() => goalMessage.remove(), 3500);
+
+        // Confeti
+        for (let i = 0; i < 50; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = `${Math.random() * 100}%`;
+            confetti.style.backgroundColor = config.pastelColors[Math.floor(Math.random() * config.pastelColors.length)];
+            confetti.style.animationDelay = `${Math.random() * 2}s`;
+            container.appendChild(confetti);
+            setTimeout(() => confetti.remove(), 3000);
+        }
+    }
+};
+
+// -----------------------------------------------------------------------------------
+// 4. MÓDULO DE MODALES (MODALS)
+// -----------------------------------------------------------------------------------
+
+const modals = {
+    // Aquí iría la lógica para crear y gestionar los modales dinámicamente.
+    // Por simplicidad en este ejemplo, mantendremos el HTML estático para los modales,
+    // pero la lógica de abrir/cerrar y rellenar se manejará aquí.
+    
+    open(modalId, itemId = null) {
+        const modal = document.getElementById(modalId);
+        if (!modal) {
+            console.error(`❌ Modal con ID "${modalId}" no encontrado.`);
+            return;
+        }
+
+        const form = modal.querySelector('form');
+        form.reset(); // Limpia el formulario
+        form.querySelector('input[type="hidden"]').value = itemId || '';
+        
+        const modalTitle = modal.querySelector('h3');
+
+        if (itemId) {
+            modalTitle.textContent = modalTitle.textContent.replace('Agregar', 'Editar').replace('Nuevo', 'Editar').replace('Crear', 'Editar');
+            const sectionKey = modalId.replace('add', '').replace('Modal', '').toLowerCase();
+            const itemData = state.db[sectionKey + 's']?.find(item => item.id == itemId);
+            if (itemData) {
+                // Rellenar el formulario con los datos del item
+                for (const key in itemData) {
+                    if (form.elements[key]) {
+                        form.elements[key].value = itemData[key];
+                    }
+                }
+            }
+        } else {
+             modalTitle.textContent = modalTitle.textContent.replace('Editar', 'Agregar').replace('Editar', 'Nuevo').replace('Editar', 'Crear');
+        }
+
+        modal.classList.add('active');
+        document.body.classList.add('modal-open');
+    },
+
+    close(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.classList.remove('active');
+        document.body.classList.remove('modal-open');
+    },
+
+    closeAll() {
+        document.querySelectorAll('.modal-backdrop').forEach(modal => {
+            modal.classList.remove('active');
+        });
+        document.body.classList.remove('modal-open');
+    }
+};
+
+// -----------------------------------------------------------------------------------
+// 5. MÓDULO DE RENDERIZADO (RENDERING)
+// -----------------------------------------------------------------------------------
+
+const rendering = {
+    createCard(config) {
+        // { id, title, subtitle, meta, notes, section, buttons }
+        const buttonsHtml = config.buttons.map(btn => 
+            `<button class="${btn.class}" onclick="${btn.action}">${btn.label}</button>`
+        ).join('');
+
+        return `
+            <div class="item-card">
+                <button class="delete-btn" onclick="app.deleteItem('${config.section}', ${config.id})">×</button>
+                <div class="item-content">
+                    <h3 class="item-title">${config.title}</h3>
+                    ${config.subtitle ? `<p class="item-subtitle">${config.subtitle}</p>` : ''}
+                    ${config.meta ? `<p class="item-meta">${config.meta}</p>` : ''}
+                    ${config.notes ? `<p class="item-notes">${config.notes}</p>` : ''}
+                    <div class="item-actions">${buttonsHtml}</div>
+                </div>
+            </div>
+        `;
+    },
+    
+    default(container, icon, title) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">${icon}</div>
+                <h3>Sección "${title}"</h3>
+                <p>Esta sección está en construcción.</p>
+            </div>`;
+    },
+
+    books(container) {
+        const booksInProgress = state.db.books.filter(book => !book.isFinished);
+        if (booksInProgress.length === 0) {
+            container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📚</div><h3>No hay libros en progreso.</h3><p>¡Agrega un nuevo libro para empezar!</p></div>`;
+            return;
+        }
+
+        container.innerHTML = booksInProgress.map(book => {
+            const clubName = book.clubId ? state.db.clubs.find(c => c.id == book.clubId)?.name : '';
+            return this.createCard({
+                id: book.id,
+                section: 'books',
+                title: book.title,
+                subtitle: `por ${book.author}`,
+                meta: clubName ? `👥 ${clubName}` : '',
+                notes: book.notes,
+                buttons: [
+                    { class: 'action-edit', label: 'Editar', action: `modals.open('addBookModal', ${book.id})` },
+                    { class: 'action-finish', label: '✅ Terminado', action: `app.markBookAsFinished(${book.id})` }
+                ]
+            });
+        }).join('');
+    },
+    
+    finished(container) {
+        const finishedBooks = state.db.books.filter(book => book.isFinished);
+         if (finishedBooks.length === 0) {
+            container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">✅</div><h3>Aún no has terminado ningún libro.</h3><p>¡Sigue leyendo!</p></div>`;
+            return;
+        }
+        
+        container.innerHTML = finishedBooks.map(book => {
+             const reviewButton = book.review 
+                ? { class: 'action-edit', label: 'Editar Reseña', action: `modals.open('addDetailedBookReviewModal', ${book.id})` }
+                : { class: 'action-review', label: '✍️ Escribir Reseña', action: `modals.open('addDetailedBookReviewModal', ${book.id})` };
+
+             return this.createCard({
+                id: book.id,
+                section: 'books',
+                title: `✅ ${book.title}`,
+                subtitle: `por ${book.author}`,
+                meta: '¡Lectura completada!',
+                buttons: [reviewButton]
+            });
+        }).join('');
+    },
+
+    // ... aquí irían las demás funciones de renderizado para cada sección ...
+};
+
+
+// -----------------------------------------------------------------------------------
+// 6. MÓDULO DE LÓGICA DE LA APLICACIÓN (APP)
+// -----------------------------------------------------------------------------------
+const app = {
+    init() {
+        storage.load();
+        storage.loadUserName();
+        ui.createHomeMenu();
+        ui.renderSection('home');
+        
+        // Event Listeners
+        document.getElementById('userName').addEventListener('change', storage.saveUserName);
+        window.addEventListener('beforeunload', storage.save);
+
+        console.log("🦄 Merakelysi App 2.0 inicializada.");
+    },
+
+    deleteItem(sectionKey, itemId) {
+        if (confirm('¿Estás segura de que quieres eliminar este elemento?')) {
+            state.db[sectionKey] = state.db[sectionKey].filter(item => item.id != itemId);
+            storage.save();
+            ui.renderContentForCurrentSection();
+            ui.showNotification('Elemento eliminado.', 'success');
+        }
+    },
+
+    handleFormSubmit(event) {
+        event.preventDefault();
+        const form = event.target;
+        const sectionKey = form.id.replace('add', '').replace('Form', '').toLowerCase() + 's';
+        
+        const formData = new FormData(form);
+        const itemData = Object.fromEntries(formData.entries());
+        const itemId = itemData.itemId;
+        
+        if (itemId) { // Editar
+            const index = state.db[sectionKey].findIndex(item => item.id == itemId);
+            if (index > -1) {
+                const existingItem = state.db[sectionKey][index];
+                state.db[sectionKey][index] = { ...existingItem, ...itemData };
+            }
+        } else { // Agregar
+            itemData.id = Date.now();
+            state.db[sectionKey].push(itemData);
+        }
+        
+        storage.save();
+        ui.renderContentForCurrentSection();
+        modals.close(form.closest('.modal-backdrop').id);
+        ui.showNotification('¡Guardado con éxito!', 'success');
+    },
+
+    markBookAsFinished(bookId){
+        const book = state.db.books.find(b => b.id == bookId);
+        if (book && confirm(`¿Marcar "${book.title}" como terminado?`)) {
+            book.isFinished = true;
+            storage.save();
+            ui.renderSection('books');
+            ui.showCelebration(`¡Felicidades por terminar "${book.title}"!`);
+        }
+    },
+    
+    generateSuggestions() {
+        ui.showNotification('Generando nuevas sugerencias...');
+        // Lógica de sugerencias (se puede hacer más compleja)
+        const allBooks = [
+             { title: "El nombre del viento", author: "Patrick Rothfuss"},
+             { title: "Cien años de soledad", author: "Gabriel García Márquez"},
+             { title: "1984", author: "George Orwell"},
+             { title: "Orgullo y prejuicio", author: "Jane Austen"},
+             { title: "La sombra del viento", author: "Carlos Ruiz Zafón"}
+        ];
+        state.db.suggestions = allBooks.sort(() => 0.5 - Math.random()).slice(0, 5)
+            .map(b => ({...b, id: Date.now() + Math.random() }));
+        
+        storage.save();
+        rendering.suggestions(document.getElementById('suggestionsContainer'));
+        ui.showNotification('¡Nuevas sugerencias listas!');
+    }
+};
+
+// -----------------------------------------------------------------------------------
+// 7. INICIALIZACIÓN
+// -----------------------------------------------------------------------------------
+
+document.addEventListener('DOMContentLoaded', () => app.init());
+
+// Este es un ejemplo de cómo podrías empezar a llenar la función de renderizado de sugerencias.
+// Las demás seguirían un patrón similar.
+rendering.suggestions = function(container) {
+    if (!state.db.suggestions || state.db.suggestions.length === 0) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🤖</div><h3>No hay sugerencias.</h3><p>¡Haz clic en "Generar Sugerencias"!</p></div>`;
+        return;
+    }
+    container.innerHTML = state.db.suggestions.map(s => this.createCard({
+        id: s.id,
+        section: 'suggestions',
+        title: s.title,
+        subtitle: `de ${s.author}`,
+        buttons: [
+            { class: 'action-add', label: '➕ Agregar a Wishlist', action: `console.log('Agregado')` } // Acción a implementar
+        ]
+    })).join('');
+};
+
+
+// Setup de todos los formularios
+function setupModalForms() {
+    document.querySelectorAll('.modal-form').forEach(form => {
+        form.addEventListener('submit', (event) => app.handleFormSubmit(event));
+    });
+}
+
+// Para cerrar modales
+function closeModal(modalId) {
+    modals.close(modalId);
+}
+
+// Para abrir modales (accesible globalmente desde el HTML)
+function openModal(modalId, itemId = null) {
+    modals.open(modalId, itemId);
+}
+
+</script>
 </body>
 </html>
